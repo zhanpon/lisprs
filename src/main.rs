@@ -1,3 +1,15 @@
+fn parse(s: &str) -> Vec<&str> {
+    return s
+        .strip_prefix("(")
+        .unwrap()
+        .strip_suffix(")")
+        .unwrap()
+        .split_whitespace()
+        .collect();
+}
+
 fn main() {
-    println!("Hello, world!");
+    let s = "(+ 1 2)";
+
+    println!("{:?}", parse(s));
 }
