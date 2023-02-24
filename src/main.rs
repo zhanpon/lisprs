@@ -23,3 +23,13 @@ fn main() {
 
     println!("{:?}", result);
 }
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add() {
+        assert_eq!(eval(parse("(+ 2 3)")), 5);
+        assert_eq!(eval(parse("(+ 4 5)")), 9);
+    }
+}
