@@ -20,7 +20,7 @@ impl FromStr for Atom {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let atom = match s.parse::<i64>() {
             Ok(i) => Atom::Integer(i),
-            Err(_) => Atom::Symbol("+".to_string()),
+            Err(_) => Atom::Symbol(s.to_string()),
         };
 
         Ok(atom)
@@ -58,12 +58,28 @@ fn add_atoms(atoms: &[Atom]) -> i64 {
     sum
 }
 
+fn mul_atoms(atoms: &[Atom]) -> i64 {
+    let mut sum = 1;
+
+    for x in atoms {
+        if let Atom::Integer(i) = x {
+            sum *= i;
+        } else {
+            panic!()
+        }
+    }
+    sum
+}
+
 fn eval(expr: SExpr) -> i64 {
     let SExpr::SList(expr) = expr;
-    if expr[0] == Atom::Symbol("+".to_string()) {
-        add_atoms(&expr[1..])
-    } else {
-        panic!()
+    match &expr[0] {
+        Atom::Symbol(s) => match s.as_str() {
+            "+" => add_atoms(&expr[1..]),
+            "*" => mul_atoms(&expr[1..]),
+            _ => panic!(),
+        },
+        _ => panic!(),
     }
 }
 
@@ -82,6 +98,12 @@ mod tests {
     fn test_add() {
         assert_eq!(eval("(+ 2 3)".parse().unwrap()), 5);
         assert_eq!(eval("(+ 4 5)".parse().unwrap()), 9);
+    }
+
+    #[test]
+    fn test_mul() {
+        assert_eq!(eval("(* 2 3)".parse().unwrap()), 6);
+        assert_eq!(eval("(* 4 5)".parse().unwrap()), 20);
     }
 
     #[test]
