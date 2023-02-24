@@ -8,8 +8,18 @@ fn parse(s: &str) -> Vec<&str> {
         .collect();
 }
 
+fn eval(s: Vec<&str>) -> i64 {
+    if s[0] == "+" {
+        return s[1..].iter().map(|a| a.parse::<i64>().unwrap()).sum();
+    } else {
+        panic!()
+    }
+}
+
 fn main() {
     let s = "(+ 1 2)";
+    let expr = parse(s);
+    let result = eval(expr);
 
-    println!("{:?}", parse(s));
+    println!("{:?}", result);
 }
