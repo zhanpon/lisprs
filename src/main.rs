@@ -10,7 +10,7 @@ enum Atom {
 #[derive(Debug, PartialEq)]
 enum SExpr {
     Atom(Atom),
-    SList(Vec<Atom>),
+    SList(Vec<SExpr>),
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -41,17 +41,17 @@ impl FromStr for SExpr {
 
         atoms
             .into_iter()
-            .map(|a| a.parse::<Atom>())
-            .collect::<Result<Vec<Atom>, _>>()
+            .map(|a| a.parse::<Atom>().map(SExpr::Atom))
+            .collect::<Result<Vec<SExpr>, _>>()
             .map(SExpr::SList)
     }
 }
 
-fn add_atoms(atoms: &[Atom]) -> i64 {
+fn add_atoms(atoms: &[SExpr]) -> i64 {
     let mut sum = 0;
 
     for x in atoms {
-        if let Atom::Integer(i) = x {
+        if let SExpr::Atom(Atom::Integer(i)) = x {
             sum += i;
         } else {
             panic!()
@@ -60,11 +60,11 @@ fn add_atoms(atoms: &[Atom]) -> i64 {
     sum
 }
 
-fn mul_atoms(atoms: &[Atom]) -> i64 {
+fn mul_atoms(atoms: &[SExpr]) -> i64 {
     let mut sum = 1;
 
     for x in atoms {
-        if let Atom::Integer(i) = x {
+        if let SExpr::Atom(Atom::Integer(i)) = x {
             sum *= i;
         } else {
             panic!()
@@ -77,7 +77,7 @@ fn eval(expr: SExpr) -> i64 {
     match expr {
         SExpr::Atom(_) => panic!(),
         SExpr::SList(slist) => match &slist[0] {
-            Atom::Symbol(s) => match s.as_str() {
+            SExpr::Atom(Atom::Symbol(s)) => match s.as_str() {
                 "+" => add_atoms(&slist[1..]),
                 "*" => mul_atoms(&slist[1..]),
                 _ => panic!(),
