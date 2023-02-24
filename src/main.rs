@@ -4,6 +4,10 @@ enum Atom {
     Integer(i64),
 }
 
+enum SExpr {
+    SList(Vec<Atom>),
+}
+
 fn parse_atom(s: &str) -> Atom {
     match s.parse::<i64>() {
         Ok(i) => Atom::Integer(i),
@@ -11,8 +15,8 @@ fn parse_atom(s: &str) -> Atom {
     }
 }
 
-fn parse(s: &str) -> Vec<Atom> {
-    return s
+fn parse(s: &str) -> SExpr {
+    let v = s
         .strip_prefix('(')
         .unwrap()
         .strip_suffix(')')
@@ -20,6 +24,8 @@ fn parse(s: &str) -> Vec<Atom> {
         .split_whitespace()
         .map(parse_atom)
         .collect();
+
+    SExpr::SList(v)
 }
 
 fn add_atoms(atoms: &[Atom]) -> i64 {
@@ -35,7 +41,8 @@ fn add_atoms(atoms: &[Atom]) -> i64 {
     sum
 }
 
-fn eval(expr: Vec<Atom>) -> i64 {
+fn eval(expr: SExpr) -> i64 {
+    let SExpr::SList(expr) = expr;
     if expr[0] == Atom::Symbol("+".to_string()) {
         add_atoms(&expr[1..])
     } else {
