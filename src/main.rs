@@ -1,16 +1,43 @@
-fn parse(s: &str) -> Vec<&str> {
+#[derive(PartialEq)]
+enum Atom {
+    Symbol(String),
+    Integer(i64),
+}
+
+fn parse_atom(s: &str) -> Atom {
+    match s.parse::<i64>() {
+        Ok(i) => Atom::Integer(i),
+        Err(_) => Atom::Symbol("+".to_string()),
+    }
+}
+
+fn parse(s: &str) -> Vec<Atom> {
     return s
         .strip_prefix("(")
         .unwrap()
         .strip_suffix(")")
         .unwrap()
         .split_whitespace()
+        .map(parse_atom)
         .collect();
 }
 
-fn eval(s: Vec<&str>) -> i64 {
-    if s[0] == "+" {
-        return s[1..].iter().map(|a| a.parse::<i64>().unwrap()).sum();
+fn add_atoms(atoms: &[Atom]) -> i64 {
+    let mut sum = 0;
+
+    for x in atoms {
+        if let Atom::Integer(i) = x {
+            sum += i;
+        } else {
+            panic!()
+        }
+    }
+    return sum;
+}
+
+fn eval(s: Vec<Atom>) -> i64 {
+    if s[0] == Atom::Symbol("+".to_string()) {
+        return add_atoms(&s[1..]);
     } else {
         panic!()
     }
