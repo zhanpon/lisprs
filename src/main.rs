@@ -6,8 +6,10 @@ enum Atom {
     Integer(i64),
 }
 
+#[allow(dead_code)]
 #[derive(Debug, PartialEq)]
 enum SExpr {
+    Atom(Atom),
     SList(Vec<Atom>),
 }
 
@@ -72,14 +74,16 @@ fn mul_atoms(atoms: &[Atom]) -> i64 {
 }
 
 fn eval(expr: SExpr) -> i64 {
-    let SExpr::SList(expr) = expr;
-    match &expr[0] {
-        Atom::Symbol(s) => match s.as_str() {
-            "+" => add_atoms(&expr[1..]),
-            "*" => mul_atoms(&expr[1..]),
+    match expr {
+        SExpr::Atom(_) => panic!(),
+        SExpr::SList(slist) => match &slist[0] {
+            Atom::Symbol(s) => match s.as_str() {
+                "+" => add_atoms(&slist[1..]),
+                "*" => mul_atoms(&slist[1..]),
+                _ => panic!(),
+            },
             _ => panic!(),
         },
-        _ => panic!(),
     }
 }
 
