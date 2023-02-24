@@ -13,9 +13,9 @@ fn parse_atom(s: &str) -> Atom {
 
 fn parse(s: &str) -> Vec<Atom> {
     return s
-        .strip_prefix("(")
+        .strip_prefix('(')
         .unwrap()
-        .strip_suffix(")")
+        .strip_suffix(')')
         .unwrap()
         .split_whitespace()
         .map(parse_atom)
@@ -32,12 +32,12 @@ fn add_atoms(atoms: &[Atom]) -> i64 {
             panic!()
         }
     }
-    return sum;
+    sum
 }
 
 fn eval(expr: Vec<Atom>) -> i64 {
     if expr[0] == Atom::Symbol("+".to_string()) {
-        return add_atoms(&expr[1..]);
+        add_atoms(&expr[1..])
     } else {
         panic!()
     }
@@ -51,6 +51,7 @@ fn main() {
     println!("{:?}", result);
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
