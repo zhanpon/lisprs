@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 #[derive(PartialEq)]
 enum Atom {
     Symbol(String),
@@ -8,24 +10,31 @@ enum SExpr {
     SList(Vec<Atom>),
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct ParseSExprError;
+
+impl FromStr for SExpr {
+    type Err = ParseSExprError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let v = s
+            .strip_prefix('(')
+            .unwrap()
+            .strip_suffix(')')
+            .unwrap()
+            .split_whitespace()
+            .map(parse_atom)
+            .collect();
+
+        Ok(SExpr::SList(v))
+    }
+}
+
 fn parse_atom(s: &str) -> Atom {
     match s.parse::<i64>() {
         Ok(i) => Atom::Integer(i),
         Err(_) => Atom::Symbol("+".to_string()),
     }
-}
-
-fn parse(s: &str) -> SExpr {
-    let v = s
-        .strip_prefix('(')
-        .unwrap()
-        .strip_suffix(')')
-        .unwrap()
-        .split_whitespace()
-        .map(parse_atom)
-        .collect();
-
-    SExpr::SList(v)
 }
 
 fn add_atoms(atoms: &[Atom]) -> i64 {
@@ -51,8 +60,7 @@ fn eval(expr: SExpr) -> i64 {
 }
 
 fn main() {
-    let s = "(+ 1 2)";
-    let expr = parse(s);
+    let expr = "(+ 1 2)".parse().unwrap();
     let result = eval(expr);
 
     println!("{:?}", result);
@@ -64,7 +72,7 @@ mod tests {
 
     #[test]
     fn test_add() {
-        assert_eq!(eval(parse("(+ 2 3)")), 5);
-        assert_eq!(eval(parse("(+ 4 5)")), 9);
+        assert_eq!(eval("(+ 2 3)".parse().unwrap()), 5);
+        assert_eq!(eval("(+ 4 5)".parse().unwrap()), 9);
     }
 }
