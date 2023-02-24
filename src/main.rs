@@ -17,16 +17,13 @@ impl FromStr for SExpr {
     type Err = ParseSExprError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let v = s
+        let atoms = s
             .strip_prefix('(')
-            .unwrap()
-            .strip_suffix(')')
-            .unwrap()
-            .split_whitespace()
-            .map(parse_atom)
-            .collect();
+            .and_then(|s| s.strip_suffix(')'))
+            .map(|s| s.split_whitespace())
+            .ok_or(ParseSExprError)?;
 
-        Ok(SExpr::SList(v))
+        Ok(SExpr::SList(atoms.map(parse_atom).collect()))
     }
 }
 
