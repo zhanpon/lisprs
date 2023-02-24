@@ -29,21 +29,29 @@ impl FromStr for Atom {
     }
 }
 
+fn parse_slist(s: &str) -> Result<SExpr, ParseSExprError> {
+    let atoms = s
+        .strip_prefix('(')
+        .and_then(|s| s.strip_suffix(')'))
+        .map(|s| s.split_whitespace())
+        .ok_or(ParseSExprError)?;
+
+    atoms
+        .into_iter()
+        .map(|a| a.parse::<Atom>().map(SExpr::Atom))
+        .collect::<Result<Vec<SExpr>, _>>()
+        .map(SExpr::SList)
+}
+
 impl FromStr for SExpr {
     type Err = ParseSExprError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let atoms = s
-            .strip_prefix('(')
-            .and_then(|s| s.strip_suffix(')'))
-            .map(|s| s.split_whitespace())
-            .ok_or(ParseSExprError)?;
-
-        atoms
-            .into_iter()
-            .map(|a| a.parse::<Atom>().map(SExpr::Atom))
-            .collect::<Result<Vec<SExpr>, _>>()
-            .map(SExpr::SList)
+        if s.starts_with('(') {
+            parse_slist(s)
+        } else {
+            Atom::from_str(s).map(SExpr::Atom)
+        }
     }
 }
 
@@ -73,9 +81,16 @@ fn mul_atoms(atoms: &[SExpr]) -> i64 {
     sum
 }
 
+fn eval_atom(atom: Atom) -> i64 {
+    match atom {
+        Atom::Integer(i) => i,
+        _ => todo!(),
+    }
+}
+
 fn eval(expr: SExpr) -> i64 {
     match expr {
-        SExpr::Atom(_) => panic!(),
+        SExpr::Atom(a) => eval_atom(a),
         SExpr::SList(slist) => match &slist[0] {
             SExpr::Atom(Atom::Symbol(s)) => match s.as_str() {
                 "+" => add_atoms(&slist[1..]),
@@ -111,7 +126,12 @@ mod tests {
     }
 
     #[test]
+    fn test_atom() {
+        assert_eq!(eval("3".parse().unwrap()), 3);
+    }
+
+    #[test]
     fn test_parse_error() {
-        assert_eq!(")".parse::<SExpr>(), Err(ParseSExprError))
+        assert_eq!("(".parse::<SExpr>(), Err(ParseSExprError))
     }
 }
