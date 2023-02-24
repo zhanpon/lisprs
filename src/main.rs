@@ -35,9 +35,9 @@ fn add_atoms(atoms: &[Atom]) -> i64 {
     return sum;
 }
 
-fn eval(s: Vec<Atom>) -> i64 {
-    if s[0] == Atom::Symbol("+".to_string()) {
-        return add_atoms(&s[1..]);
+fn eval(expr: Vec<Atom>) -> i64 {
+    if expr[0] == Atom::Symbol("+".to_string()) {
+        return add_atoms(&expr[1..]);
     } else {
         panic!()
     }
