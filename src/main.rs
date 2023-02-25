@@ -55,46 +55,20 @@ impl FromStr for SExpr {
     }
 }
 
-fn add_atoms(atoms: &[SExpr]) -> i64 {
-    let mut sum = 0;
-
-    for x in atoms {
-        if let SExpr::Atom(Atom::Integer(i)) = x {
-            sum += i;
-        } else {
-            panic!()
-        }
-    }
-    sum
-}
-
-fn mul_atoms(atoms: &[SExpr]) -> i64 {
-    let mut sum = 1;
-
-    for x in atoms {
-        if let SExpr::Atom(Atom::Integer(i)) = x {
-            sum *= i;
-        } else {
-            panic!()
-        }
-    }
-    sum
-}
-
-fn eval_atom(atom: Atom) -> i64 {
+fn eval_atom(atom: &Atom) -> i64 {
     match atom {
-        Atom::Integer(i) => i,
+        Atom::Integer(i) => *i,
         _ => todo!(),
     }
 }
 
-fn eval(expr: SExpr) -> i64 {
+fn eval(expr: &SExpr) -> i64 {
     match expr {
         SExpr::Atom(a) => eval_atom(a),
         SExpr::SList(slist) => match &slist[0] {
             SExpr::Atom(Atom::Symbol(s)) => match s.as_str() {
-                "+" => add_atoms(&slist[1..]),
-                "*" => mul_atoms(&slist[1..]),
+                "+" => slist[1..].iter().map(eval).sum(),
+                "*" => slist[1..].iter().map(eval).product(),
                 _ => panic!(),
             },
             _ => panic!(),
@@ -102,9 +76,13 @@ fn eval(expr: SExpr) -> i64 {
     }
 }
 
+fn parse_eval(s: &str) -> i64 {
+    let ast = SExpr::from_str(s).unwrap();
+    eval(&ast)
+}
+
 fn main() {
-    let expr = "(+ 1 2)".parse().unwrap();
-    let result = eval(expr);
+    let result = parse_eval("(+ 1 2)");
 
     println!("{:?}", result);
 }
@@ -115,19 +93,19 @@ mod tests {
 
     #[test]
     fn test_add() {
-        assert_eq!(eval("(+ 2 3)".parse().unwrap()), 5);
-        assert_eq!(eval("(+ 4 5)".parse().unwrap()), 9);
+        assert_eq!(parse_eval("(+ 2 3)"), 5);
+        assert_eq!(parse_eval("(+ 4 5)"), 9);
     }
 
     #[test]
     fn test_mul() {
-        assert_eq!(eval("(* 2 3)".parse().unwrap()), 6);
-        assert_eq!(eval("(* 4 5)".parse().unwrap()), 20);
+        assert_eq!(parse_eval("(* 2 3)"), 6);
+        assert_eq!(parse_eval("(* 4 5)"), 20);
     }
 
     #[test]
     fn test_atom() {
-        assert_eq!(eval("3".parse().unwrap()), 3);
+        assert_eq!(parse_eval("3"), 3);
     }
 
     #[test]
