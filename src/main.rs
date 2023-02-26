@@ -1,3 +1,5 @@
+mod tokenize;
+
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq)]
@@ -30,15 +32,15 @@ impl FromStr for Atom {
 }
 
 fn parse_slist(s: &str) -> Result<SExpr, ParseSExprError> {
-    let atoms = s
+    let expr_list = s
         .strip_prefix('(')
         .and_then(|s| s.strip_suffix(')'))
         .map(|s| s.split_whitespace())
         .ok_or(ParseSExprError)?;
 
-    atoms
+    expr_list
         .into_iter()
-        .map(|a| a.parse::<Atom>().map(SExpr::Atom))
+        .map(SExpr::from_str)
         .collect::<Result<Vec<SExpr>, _>>()
         .map(SExpr::SList)
 }
