@@ -30,14 +30,14 @@ impl<'a> Iterator for Tokenizer<'a> {
 mod tests {
     use super::*;
 
+    fn tokenize(s: &str) -> Vec<&str> {
+        let tokenizer = Tokenizer { remaining: s };
+
+        tokenizer.collect()
+    }
+
     #[test]
     fn test_tokenizer() {
-        let tokenizer = Tokenizer {
-            remaining: "(+ 1 2)",
-        };
-
-        let tokens: Vec<&str> = tokenizer.collect();
-
-        assert_eq!(tokens, vec!["(", "+", "1", "2", ")"]);
+        assert_eq!(tokenize("(+ 1 2)"), vec!["(", "+", "1", "2", ")"]);
     }
 }
