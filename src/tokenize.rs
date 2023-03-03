@@ -4,7 +4,9 @@ struct Tokenizer<'a> {
 
 impl<'a> From<&'a str> for Tokenizer<'a> {
     fn from(value: &'a str) -> Self {
-        Tokenizer { remaining: value }
+        Tokenizer {
+            remaining: value.trim_start(),
+        }
     }
 }
 
@@ -46,5 +48,6 @@ mod tests {
     fn test_tokenizer() {
         assert_eq!(tokenize("(+ 1 2)"), vec!["(", "+", "1", "2", ")"]);
         assert_eq!(tokenize("(+  1 2)"), vec!["(", "+", "1", "2", ")"]);
+        assert_eq!(tokenize(" (+  1 2)"), vec!["(", "+", "1", "2", ")"]);
     }
 }
