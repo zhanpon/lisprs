@@ -2,6 +2,12 @@ struct Tokenizer<'a> {
     remaining: &'a str,
 }
 
+impl<'a> From<&'a str> for Tokenizer<'a> {
+    fn from(value: &'a str) -> Self {
+        Tokenizer { remaining: value }
+    }
+}
+
 impl<'a> Iterator for Tokenizer<'a> {
     type Item = &'a str;
 
@@ -31,7 +37,7 @@ mod tests {
     use super::*;
 
     fn tokenize(s: &str) -> Vec<&str> {
-        let tokenizer = Tokenizer { remaining: s };
+        let tokenizer = Tokenizer::from(s);
 
         tokenizer.collect()
     }
