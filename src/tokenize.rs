@@ -26,12 +26,10 @@ impl<'a> Iterator for Tokenizer<'a> {
     type Item = &'a str;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some((token, remaining)) = scan_one_token(self.remaining) {
+        scan_one_token(self.remaining).map(|(token, remaining)| {
             self.remaining = remaining;
-            Some(token)
-        } else {
-            None
-        }
+            token
+        })
     }
 }
 
