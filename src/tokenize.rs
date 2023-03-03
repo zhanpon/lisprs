@@ -18,19 +18,17 @@ impl<'a> Iterator for Tokenizer<'a> {
             return None;
         }
 
-        if self.remaining.starts_with(['(', ')']) {
-            let token = &self.remaining[..1];
-            self.remaining = &self.remaining[1..];
-            Some(token)
+        let (token, remaining) = if self.remaining.starts_with(['(', ')']) {
+            self.remaining.split_at(1)
         } else if let Some(i) = self.remaining.find([' ', '(', ')']) {
-            let (token, remaining) = self.remaining.split_at(i);
-            self.remaining = remaining.trim_start();
-            Some(token)
+            let (t, r) = self.remaining.split_at(i);
+            (t, r.trim_start())
         } else {
-            let token = self.remaining;
-            self.remaining = "";
-            Some(token)
-        }
+            (self.remaining, "")
+        };
+
+        self.remaining = remaining;
+        Some(token)
     }
 }
 
