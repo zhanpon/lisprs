@@ -21,13 +21,12 @@ impl<'a> Iterator for Tokenizer<'a> {
         let (token, remaining) = if self.remaining.starts_with(['(', ')']) {
             self.remaining.split_at(1)
         } else if let Some(i) = self.remaining.find([' ', '(', ')']) {
-            let (t, r) = self.remaining.split_at(i);
-            (t, r.trim_start())
+            self.remaining.split_at(i)
         } else {
             (self.remaining, "")
         };
 
-        self.remaining = remaining;
+        self.remaining = remaining.trim_start();
         Some(token)
     }
 }
@@ -47,6 +46,7 @@ mod tests {
         assert_eq!(tokenize("(+ 1 2)"), vec!["(", "+", "1", "2", ")"]);
         assert_eq!(tokenize("(+  1 2)"), vec!["(", "+", "1", "2", ")"]);
         assert_eq!(tokenize(" (+  1 2)"), vec!["(", "+", "1", "2", ")"]);
+        assert_eq!(tokenize(" ( + 1 2)"), vec!["(", "+", "1", "2", ")"]);
 
         assert_eq!(
             tokenize("(+ 1 (* 2 3))"),
