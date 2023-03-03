@@ -49,5 +49,10 @@ mod tests {
         assert_eq!(tokenize("(+ 1 2)"), vec!["(", "+", "1", "2", ")"]);
         assert_eq!(tokenize("(+  1 2)"), vec!["(", "+", "1", "2", ")"]);
         assert_eq!(tokenize(" (+  1 2)"), vec!["(", "+", "1", "2", ")"]);
+
+        assert_eq!(
+            tokenize("(+ 1 (* 2 3))"),
+            vec!["(", "+", "1", "(", "*", "2", "3", ")", ")"]
+        );
     }
 }
