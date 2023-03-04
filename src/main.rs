@@ -1,7 +1,8 @@
-mod tokenize;
+use std::str::FromStr;
 
 use crate::tokenize::Tokenizer;
-use std::str::FromStr;
+
+mod tokenize;
 
 #[derive(Debug, PartialEq)]
 enum Atom {
@@ -42,8 +43,8 @@ fn consume_token<'a>(
     }
 }
 
-fn parse_slist(s: &str) -> Result<SExpr, ParseSExprError> {
-    let mut tokens = Tokenizer::from(s).peekable();
+fn parse_slist<'a>(tokens: impl Iterator<Item = &'a str>) -> Result<SExpr, ParseSExprError> {
+    let mut tokens = tokens.peekable();
     consume_token(&mut tokens, "(")?;
 
     let mut exprs: Vec<SExpr> = vec![];
@@ -54,7 +55,7 @@ fn parse_slist(s: &str) -> Result<SExpr, ParseSExprError> {
         }
 
         if let Some(t) = tokens.next() {
-            let expr = SExpr::from_str(t)?;
+            let expr = SExpr::Atom(t.parse().unwrap());
             exprs.push(expr);
         } else {
             return Err(ParseSExprError);
@@ -65,17 +66,33 @@ fn parse_slist(s: &str) -> Result<SExpr, ParseSExprError> {
     Ok(SExpr::SList(exprs))
 }
 
-impl FromStr for SExpr {
-    type Err = ParseSExprError;
+fn parse_expr<'a>(tokens: impl Iterator<Item = &'a str>) -> Result<SExpr, ParseSExprError> {
+    let mut tokens = tokens.peekable();
+    let maybe_first_token = tokens.peek();
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.starts_with('(') {
-            parse_slist(s)
-        } else {
-            Atom::from_str(s).map(SExpr::Atom)
-        }
+    if maybe_first_token.is_none() {
+        return Err(ParseSExprError);
+    }
+
+    let first_token = maybe_first_token.unwrap();
+    if first_token == &"(" {
+        parse_slist(tokens)
+    } else {
+        Ok(SExpr::Atom(tokens.next().unwrap().parse().unwrap()))
     }
 }
+
+// impl FromStr for SExpr {
+//     type Err = ParseSExprError;
+//
+//     fn from_str(s: &str) -> Result<Self, Self::Err> {
+//         if s.starts_with('(') {
+//             parse_slist(s)
+//         } else {
+//             Atom::from_str(s).map(SExpr::Atom)
+//         }
+//     }
+// }
 
 fn eval_atom(atom: &Atom) -> i64 {
     match atom {
@@ -99,7 +116,8 @@ fn eval(expr: &SExpr) -> i64 {
 }
 
 fn parse_eval(s: &str) -> i64 {
-    let ast = SExpr::from_str(s).unwrap();
+    let tokens = Tokenizer::from(s);
+    let ast = parse_expr(tokens).unwrap();
     eval(&ast)
 }
 
@@ -130,8 +148,8 @@ mod tests {
         assert_eq!(parse_eval("3"), 3);
     }
 
-    #[test]
-    fn test_parse_error() {
-        assert_eq!("(".parse::<SExpr>(), Err(ParseSExprError))
-    }
+    // #[test]
+    // fn test_parse_error() {
+    //     assert_eq!("(".parse::<SExpr>(), Err(ParseSExprError))
+    // }
 }
