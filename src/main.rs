@@ -36,14 +36,9 @@ fn consume_token<'a>(
     tokens: &mut impl Iterator<Item = &'a str>,
     expected: &str,
 ) -> Result<(), ParseSExprError> {
-    if let Some(t) = tokens.next() {
-        if t == expected {
-            Ok(())
-        } else {
-            Err(ParseSExprError)
-        }
-    } else {
-        Err(ParseSExprError)
+    match tokens.next() {
+        Some(t) if t == expected => Ok(()),
+        _ => Err(ParseSExprError),
     }
 }
 
