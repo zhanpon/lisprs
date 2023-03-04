@@ -32,12 +32,27 @@ impl FromStr for Atom {
     }
 }
 
-fn parse_slist(s: &str) -> Result<SExpr, ParseSExprError> {
-    let mut tokens: Vec<&str> = Tokenizer::from(s).collect();
-    let first_token = tokens.remove(0);
-    if first_token != "(" {
-        return Err(ParseSExprError);
+fn consume_token<'a>(
+    tokens: &mut impl Iterator<Item = &'a str>,
+    expected: &str,
+) -> Result<(), ParseSExprError> {
+    if let Some(t) = tokens.next() {
+        if t == expected {
+            Ok(())
+        } else {
+            Err(ParseSExprError)
+        }
+    } else {
+        Err(ParseSExprError)
     }
+}
+
+fn parse_slist(s: &str) -> Result<SExpr, ParseSExprError> {
+    let mut tokens = Tokenizer::from(s);
+    consume_token(&mut tokens, "(")?;
+
+    let mut tokens: Vec<&str> = tokens.collect();
+
     let last_token = tokens.pop().ok_or(ParseSExprError)?;
     if last_token != ")" {
         return Err(ParseSExprError);
