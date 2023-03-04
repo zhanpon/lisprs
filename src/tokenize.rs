@@ -1,4 +1,4 @@
-struct Tokenizer<'a> {
+pub struct Tokenizer<'a> {
     remaining: &'a str,
 }
 

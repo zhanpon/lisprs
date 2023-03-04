@@ -1,5 +1,6 @@
 mod tokenize;
 
+use crate::tokenize::Tokenizer;
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq)]
@@ -32,13 +33,17 @@ impl FromStr for Atom {
 }
 
 fn parse_slist(s: &str) -> Result<SExpr, ParseSExprError> {
-    let expr_list = s
-        .strip_prefix('(')
-        .and_then(|s| s.strip_suffix(')'))
-        .map(|s| s.split_whitespace())
-        .ok_or(ParseSExprError)?;
+    let mut tokens: Vec<&str> = Tokenizer::from(s).collect();
+    let first_token = tokens.remove(0);
+    if first_token != "(" {
+        return Err(ParseSExprError);
+    }
+    let last_token = tokens.pop().ok_or(ParseSExprError)?;
+    if last_token != ")" {
+        return Err(ParseSExprError);
+    }
 
-    expr_list
+    tokens
         .into_iter()
         .map(SExpr::from_str)
         .collect::<Result<Vec<SExpr>, _>>()
