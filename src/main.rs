@@ -1,3 +1,4 @@
+use std::iter::Peekable;
 use std::str::FromStr;
 
 use crate::tokenize::Tokenizer;
@@ -33,51 +34,54 @@ impl FromStr for Atom {
     }
 }
 
-fn consume_token(
-    tokens: &mut dyn Iterator<Item = &str>,
-    expected: &str,
-) -> Result<(), ParseSExprError> {
-    match tokens.next() {
-        Some(t) if t == expected => Ok(()),
-        _ => Err(ParseSExprError),
-    }
+struct Parser<'a> {
+    tokenizer: Peekable<Tokenizer<'a>>,
 }
 
-fn parse_slist(tokens: &mut dyn Iterator<Item = &str>) -> Result<SExpr, ParseSExprError> {
-    let mut tokens = tokens.peekable();
-    consume_token(&mut tokens, "(")?;
+impl<'a> Parser<'a> {
+    fn consume_token(&mut self, expected: &str) -> Result<(), ParseSExprError> {
+        match self.tokenizer.next() {
+            Some(t) if t == expected => Ok(()),
+            _ => Err(ParseSExprError),
+        }
+    }
 
-    let mut exprs: Vec<SExpr> = vec![];
+    fn parse_expr(&mut self) -> Result<SExpr, ParseSExprError> {
+        let tokens = &mut self.tokenizer;
+        let maybe_first_token = tokens.peek();
 
-    loop {
-        if tokens.peek().is_none() {
+        if maybe_first_token.is_none() {
             return Err(ParseSExprError);
         }
-        if tokens.peek() == Some(&")") {
-            break;
+
+        let first_token = maybe_first_token.unwrap();
+        if first_token == &"(" {
+            self.parse_slist()
+        } else {
+            Ok(SExpr::Atom(tokens.next().unwrap().parse().unwrap()))
+        }
+    }
+
+    fn parse_slist(&mut self) -> Result<SExpr, ParseSExprError> {
+        // let tokens = &mut self.tokenizer;
+        self.consume_token("(")?;
+
+        let mut exprs: Vec<SExpr> = vec![];
+
+        loop {
+            if self.tokenizer.peek().is_none() {
+                return Err(ParseSExprError);
+            }
+            if self.tokenizer.peek() == Some(&")") {
+                break;
+            }
+
+            let expr = self.parse_expr().unwrap();
+            exprs.push(expr);
         }
 
-        let expr = parse_expr(&mut tokens).unwrap();
-        exprs.push(expr);
-    }
-
-    consume_token(&mut tokens, ")")?;
-    Ok(SExpr::SList(exprs))
-}
-
-fn parse_expr(tokens: &mut dyn Iterator<Item = &str>) -> Result<SExpr, ParseSExprError> {
-    let mut tokens = tokens.peekable();
-    let maybe_first_token = tokens.peek();
-
-    if maybe_first_token.is_none() {
-        return Err(ParseSExprError);
-    }
-
-    let first_token = maybe_first_token.unwrap();
-    if first_token == &"(" {
-        parse_slist(&mut tokens)
-    } else {
-        Ok(SExpr::Atom(tokens.next().unwrap().parse().unwrap()))
+        self.consume_token(")")?;
+        Ok(SExpr::SList(exprs))
     }
 }
 
@@ -103,8 +107,11 @@ fn eval(expr: &SExpr) -> i64 {
 }
 
 fn parse_eval(s: &str) -> i64 {
-    let mut tokens = Tokenizer::from(s);
-    let ast = parse_expr(&mut tokens).unwrap();
+    let tokens = Tokenizer::from(s);
+    let mut parser = Parser {
+        tokenizer: tokens.peekable(),
+    };
+    let ast = parser.parse_expr().unwrap();
     eval(&ast)
 }
 
