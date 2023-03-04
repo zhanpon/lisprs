@@ -43,21 +43,26 @@ fn consume_token<'a>(
 }
 
 fn parse_slist(s: &str) -> Result<SExpr, ParseSExprError> {
-    let mut tokens = Tokenizer::from(s);
+    let mut tokens = Tokenizer::from(s).peekable();
     consume_token(&mut tokens, "(")?;
 
-    let mut tokens: Vec<&str> = tokens.collect();
+    let mut exprs: Vec<SExpr> = vec![];
 
-    let last_token = tokens.pop().ok_or(ParseSExprError)?;
-    if last_token != ")" {
-        return Err(ParseSExprError);
+    loop {
+        if tokens.peek() == Some(&")") {
+            break;
+        }
+
+        if let Some(t) = tokens.next() {
+            let expr = SExpr::from_str(t)?;
+            exprs.push(expr);
+        } else {
+            return Err(ParseSExprError);
+        }
     }
 
-    tokens
-        .into_iter()
-        .map(SExpr::from_str)
-        .collect::<Result<Vec<SExpr>, _>>()
-        .map(SExpr::SList)
+    consume_token(&mut tokens, ")")?;
+    Ok(SExpr::SList(exprs))
 }
 
 impl FromStr for SExpr {
