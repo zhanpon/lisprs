@@ -66,21 +66,16 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_slist(&mut self) -> Result<SExpr, ParseSExprError> {
-        // let tokens = &mut self.tokenizer;
         self.consume_token("(")?;
 
         let mut exprs: Vec<SExpr> = vec![];
-
         loop {
-            if self.tokenizer.peek().is_none() {
-                return Err(ParseSExprError);
-            }
-            if self.tokenizer.peek() == Some(&")") {
+            let token = self.tokenizer.peek().ok_or(ParseSExprError)?;
+            if token == &")" {
                 break;
             }
 
-            let expr = self.parse_expr().unwrap();
-            exprs.push(expr);
+            exprs.push(self.parse_expr()?);
         }
 
         self.consume_token(")")?;
