@@ -29,9 +29,7 @@ fn eval(expr: &SExpr) -> i64 {
 
 fn parse_eval(s: &str) -> i64 {
     let tokens = Tokenizer::from(s);
-    let mut parser = Parser {
-        tokenizer: tokens.peekable(),
-    };
+    let mut parser = Parser::new(tokens);
     let ast = parser.parse_expr().unwrap();
     eval(&ast)
 }

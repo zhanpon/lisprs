@@ -37,6 +37,12 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
+    pub fn new(tokenizer: Tokenizer) -> Parser {
+        Parser {
+            tokenizer: tokenizer.peekable(),
+        }
+    }
+
     fn consume_token(&mut self, expected: &str) -> Result<(), ParseSExprError> {
         match self.tokenizer.next() {
             Some(t) if t == expected => Ok(()),
