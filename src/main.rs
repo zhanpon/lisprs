@@ -64,5 +64,6 @@ mod tests {
     #[test]
     fn test_nested() {
         assert_eq!(parse_eval("(+ 1 (* 2 3))"), 7);
+        assert_eq!(parse_eval("(+ (* 1 2) (* 3 (+ 4 5)))"), 29);
     }
 }
