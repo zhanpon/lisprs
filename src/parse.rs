@@ -9,7 +9,6 @@ pub enum Atom {
     Integer(i64),
 }
 
-#[allow(dead_code)]
 #[derive(Debug, PartialEq)]
 pub enum SExpr {
     Atom(Atom),
