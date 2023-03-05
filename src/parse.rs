@@ -50,13 +50,18 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn parse_atom(&mut self) -> Result<Atom, ParseSExprError> {
+        let token = self.tokenizer.next().ok_or(ParseSExprError)?;
+        Atom::from_str(token)
+    }
+
     pub fn parse_expr(&mut self) -> Result<SExpr, ParseSExprError> {
         let first_token = self.tokenizer.peek().ok_or(ParseSExprError)?;
 
         if first_token == &"(" {
             self.parse_slist()
         } else {
-            Ok(SExpr::Atom(self.tokenizer.next().unwrap().parse().unwrap()))
+            self.parse_atom().map(SExpr::Atom)
         }
     }
 
