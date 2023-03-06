@@ -42,10 +42,14 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn consume_token(&mut self, expected: &str) -> Result<(), ParseSExprError> {
-        match self.tokenizer.next() {
-            Some(t) if t == expected => Ok(()),
-            _ => Err(ParseSExprError),
+    fn consume_token(&mut self, expected: &str) {
+        let token = self
+            .tokenizer
+            .next()
+            .unwrap_or_else(|| panic!("Expected {}, but got no token", expected));
+
+        if token != expected {
+            panic!("Expected {}, but got {}", expected, token);
         }
     }
 
@@ -58,26 +62,26 @@ impl<'a> Parser<'a> {
         let first_token = self.tokenizer.peek().ok_or(ParseSExprError)?;
 
         if first_token == &"(" {
-            self.parse_slist()
+            self.parse_slist().map(SExpr::SList)
         } else {
             self.parse_atom().map(SExpr::Atom)
         }
     }
 
-    fn parse_slist(&mut self) -> Result<SExpr, ParseSExprError> {
-        self.consume_token("(")?;
+    fn parse_slist(&mut self) -> Result<Vec<SExpr>, ParseSExprError> {
+        self.consume_token("(");
 
         let mut exprs: Vec<SExpr> = vec![];
-        loop {
-            let token = self.tokenizer.peek().ok_or(ParseSExprError)?;
+
+        while let Some(token) = self.tokenizer.peek() {
             if token == &")" {
-                break;
+                self.consume_token(")");
+                return Ok(exprs);
             }
 
             exprs.push(self.parse_expr()?);
         }
 
-        self.consume_token(")")?;
-        Ok(SExpr::SList(exprs))
+        Err(ParseSExprError)
     }
 }
