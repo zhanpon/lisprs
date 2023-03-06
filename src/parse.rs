@@ -58,26 +58,26 @@ impl<'a> Parser<'a> {
         let first_token = self.tokenizer.peek().ok_or(ParseSExprError)?;
 
         if first_token == &"(" {
-            self.parse_slist()
+            self.parse_slist().map(SExpr::SList)
         } else {
             self.parse_atom().map(SExpr::Atom)
         }
     }
 
-    fn parse_slist(&mut self) -> Result<SExpr, ParseSExprError> {
+    fn parse_slist(&mut self) -> Result<Vec<SExpr>, ParseSExprError> {
         self.consume_token("(")?;
 
         let mut exprs: Vec<SExpr> = vec![];
-        loop {
-            let token = self.tokenizer.peek().ok_or(ParseSExprError)?;
+
+        while let Some(token) = self.tokenizer.peek() {
             if token == &")" {
-                break;
+                self.consume_token(")")?;
+                return Ok(exprs);
             }
 
             exprs.push(self.parse_expr()?);
         }
 
-        self.consume_token(")")?;
-        Ok(SExpr::SList(exprs))
+        Err(ParseSExprError)
     }
 }
