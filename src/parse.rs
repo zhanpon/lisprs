@@ -42,10 +42,14 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn consume_token(&mut self, expected: &str) -> Result<(), ParseSExprError> {
-        match self.tokenizer.next() {
-            Some(t) if t == expected => Ok(()),
-            _ => Err(ParseSExprError),
+    fn consume_token(&mut self, expected: &str) {
+        let token = self
+            .tokenizer
+            .next()
+            .unwrap_or_else(|| panic!("Expected {}, but got no token", expected));
+
+        if token != expected {
+            panic!("Expected {}, but got {}", expected, token);
         }
     }
 
@@ -65,13 +69,13 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_slist(&mut self) -> Result<Vec<SExpr>, ParseSExprError> {
-        self.consume_token("(")?;
+        self.consume_token("(");
 
         let mut exprs: Vec<SExpr> = vec![];
 
         while let Some(token) = self.tokenizer.peek() {
             if token == &")" {
-                self.consume_token(")")?;
+                self.consume_token(")");
                 return Ok(exprs);
             }
 
