@@ -1,3 +1,5 @@
+use std::io::{stdin, stdout, Write};
+
 use crate::parse::Atom;
 use crate::parse::Parser;
 use crate::parse::SExpr;
@@ -35,9 +37,15 @@ fn parse_eval(s: &str) -> i64 {
 }
 
 fn main() {
-    let result = parse_eval("(+ 1 2)");
+    loop {
+        print!("> ");
+        stdout().flush().unwrap();
 
-    println!("{:?}", result);
+        let mut input_string = String::new();
+        stdin().read_line(&mut input_string).unwrap();
+        let result = parse_eval(input_string.as_str());
+        println!("{}", result);
+    }
 }
 
 #[cfg(test)]
