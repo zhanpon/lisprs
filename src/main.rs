@@ -22,9 +22,9 @@ fn eval(expr: &SExpr) -> i64 {
             SExpr::Atom(Atom::Symbol(s)) => match s.as_str() {
                 "+" => slist[1..].iter().map(eval).sum(),
                 "*" => slist[1..].iter().map(eval).product(),
-                _ => panic!(),
+                _ => todo!(),
             },
-            _ => panic!(),
+            _ => todo!(),
         },
     }
 }
