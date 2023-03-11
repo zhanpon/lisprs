@@ -43,6 +43,13 @@ fn main() {
 
         let mut input_string = String::new();
         stdin().read_line(&mut input_string).unwrap();
+
+        if input_string.is_empty() {
+            break;
+        } else if input_string == "\n" {
+            continue;
+        }
+
         let result = parse_eval(input_string.as_str());
         println!("{}", result);
     }
