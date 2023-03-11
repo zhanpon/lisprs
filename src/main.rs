@@ -8,20 +8,47 @@ use crate::tokenize::Tokenizer;
 mod parse;
 mod tokenize;
 
-fn eval_atom(atom: &Atom) -> i64 {
+#[derive(Debug, PartialEq)]
+enum Value {
+    Integer(i64),
+}
+
+fn sum_values(vs: &[Value]) -> Value {
+    let mut acc = 0;
+    for v in vs {
+        match v {
+            Value::Integer(n) => acc += n,
+        }
+    }
+
+    Value::Integer(acc)
+}
+
+fn product_values(vs: &[Value]) -> Value {
+    let mut acc = 1;
+    for v in vs {
+        match v {
+            Value::Integer(n) => acc *= n,
+        }
+    }
+
+    Value::Integer(acc)
+}
+
+fn eval_atom(atom: &Atom) -> Value {
     match atom {
-        Atom::Integer(i) => *i,
+        Atom::Integer(i) => Value::Integer(*i),
         _ => todo!(),
     }
 }
 
-fn eval(expr: &SExpr) -> i64 {
+fn eval(expr: &SExpr) -> Value {
     match expr {
         SExpr::Atom(a) => eval_atom(a),
         SExpr::SList(slist) => match &slist[0] {
             SExpr::Atom(Atom::Symbol(s)) => match s.as_str() {
-                "+" => slist[1..].iter().map(eval).sum(),
-                "*" => slist[1..].iter().map(eval).product(),
+                "+" => sum_values(&slist[1..].iter().map(eval).collect::<Vec<Value>>()),
+                "*" => product_values(&slist[1..].iter().map(eval).collect::<Vec<Value>>()),
                 _ => todo!(),
             },
             _ => todo!(),
@@ -29,7 +56,7 @@ fn eval(expr: &SExpr) -> i64 {
     }
 }
 
-fn parse_eval(s: &str) -> Result<i64, ParseSExprError> {
+fn parse_eval(s: &str) -> Result<Value, ParseSExprError> {
     let tokens = Tokenizer::from(s);
     let mut parser = Parser::new(tokens);
     let ast = parser.parse_expr()?;
@@ -51,7 +78,7 @@ fn main() {
         }
 
         match parse_eval(input_string.trim()) {
-            Ok(v) => println!("{}", v),
+            Ok(v) => println!("{:?}", v),
             Err(e) => println!("{}", e),
         }
     }
@@ -61,30 +88,33 @@ fn main() {
 mod tests {
     use super::*;
 
-    fn parse_eval_unwrap(s: &str) -> i64 {
+    fn parse_eval_unwrap(s: &str) -> Value {
         parse_eval(s).unwrap()
     }
 
     #[test]
     fn test_add() {
-        assert_eq!(parse_eval_unwrap("(+ 2 3)"), 5);
-        assert_eq!(parse_eval_unwrap("(+ 4 5)"), 9);
+        assert_eq!(parse_eval_unwrap("(+ 2 3)"), Value::Integer(5));
+        assert_eq!(parse_eval_unwrap("(+ 4 5)"), Value::Integer(9));
     }
 
     #[test]
     fn test_mul() {
-        assert_eq!(parse_eval_unwrap("(* 2 3)"), 6);
-        assert_eq!(parse_eval_unwrap("(* 4 5)"), 20);
+        assert_eq!(parse_eval_unwrap("(* 2 3)"), Value::Integer(6));
+        assert_eq!(parse_eval_unwrap("(* 4 5)"), Value::Integer(20));
     }
 
     #[test]
     fn test_atom() {
-        assert_eq!(parse_eval_unwrap("3"), 3);
+        assert_eq!(parse_eval_unwrap("3"), Value::Integer(3));
     }
 
     #[test]
     fn test_nested() {
-        assert_eq!(parse_eval_unwrap("(+ 1 (* 2 3))"), 7);
-        assert_eq!(parse_eval_unwrap("(+ (* 1 2) (* 3 (+ 4 5)))"), 29);
+        assert_eq!(parse_eval_unwrap("(+ 1 (* 2 3))"), Value::Integer(7));
+        assert_eq!(
+            parse_eval_unwrap("(+ (* 1 2) (* 3 (+ 4 5)))"),
+            Value::Integer(29)
+        );
     }
 }
