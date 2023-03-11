@@ -1,3 +1,4 @@
+use std::fmt;
 use std::iter::Peekable;
 use std::str::FromStr;
 
@@ -16,7 +17,16 @@ pub enum SExpr {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct ParseSExprError;
+pub struct ParseSExprError {
+    message: String,
+}
+
+impl fmt::Display for ParseSExprError {
+    #[allow(deprecated, deprecated_in_future)]
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt.write_str(self.message.as_str())
+    }
+}
 
 impl FromStr for Atom {
     type Err = ParseSExprError;
@@ -54,12 +64,16 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_atom(&mut self) -> Result<Atom, ParseSExprError> {
-        let token = self.tokenizer.next().ok_or(ParseSExprError)?;
+        let token = self.tokenizer.next().ok_or(ParseSExprError {
+            message: "".to_string(),
+        })?;
         Atom::from_str(token)
     }
 
     pub fn parse_expr(&mut self) -> Result<SExpr, ParseSExprError> {
-        let first_token = self.tokenizer.peek().ok_or(ParseSExprError)?;
+        let first_token = self.tokenizer.peek().ok_or(ParseSExprError {
+            message: "".to_string(),
+        })?;
 
         if first_token == &"(" {
             self.parse_slist().map(SExpr::SList)
@@ -82,6 +96,8 @@ impl<'a> Parser<'a> {
             exprs.push(self.parse_expr()?);
         }
 
-        Err(ParseSExprError)
+        Err(ParseSExprError {
+            message: "expected a `)` to close `(`".to_string(),
+        })
     }
 }
