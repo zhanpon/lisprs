@@ -88,33 +88,31 @@ fn main() {
 mod tests {
     use super::*;
 
-    fn parse_eval_unwrap(s: &str) -> Value {
-        parse_eval(s).unwrap()
+    fn assert_evaluates_to(expr: &str, value: i64) {
+        let result = parse_eval(expr).unwrap();
+        assert_eq!(result, Value::Integer(value));
     }
 
     #[test]
     fn test_add() {
-        assert_eq!(parse_eval_unwrap("(+ 2 3)"), Value::Integer(5));
-        assert_eq!(parse_eval_unwrap("(+ 4 5)"), Value::Integer(9));
+        assert_evaluates_to("(+ 2 3)", 5);
+        assert_evaluates_to("(+ 4 5)", 9);
     }
 
     #[test]
     fn test_mul() {
-        assert_eq!(parse_eval_unwrap("(* 2 3)"), Value::Integer(6));
-        assert_eq!(parse_eval_unwrap("(* 4 5)"), Value::Integer(20));
+        assert_evaluates_to("(* 2 3)", 6);
+        assert_evaluates_to("(* 4 5)", 20);
     }
 
     #[test]
     fn test_atom() {
-        assert_eq!(parse_eval_unwrap("3"), Value::Integer(3));
+        assert_evaluates_to("3", 3);
     }
 
     #[test]
     fn test_nested() {
-        assert_eq!(parse_eval_unwrap("(+ 1 (* 2 3))"), Value::Integer(7));
-        assert_eq!(
-            parse_eval_unwrap("(+ (* 1 2) (* 3 (+ 4 5)))"),
-            Value::Integer(29)
-        );
+        assert_evaluates_to("(+ 1 (* 2 3))", 7);
+        assert_evaluates_to("(+ (* 1 2) (* 3 (+ 4 5)))", 29);
     }
 }
