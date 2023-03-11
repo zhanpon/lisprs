@@ -52,7 +52,7 @@ fn main() {
 
         match parse_eval(input_string.as_str()) {
             Ok(v) => println!("{}", v),
-            Err(e) => println!("{:?}", e),
+            Err(e) => println!("{}", e),
         }
     }
 }

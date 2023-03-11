@@ -1,3 +1,4 @@
+use std::fmt;
 use std::iter::Peekable;
 use std::str::FromStr;
 
@@ -18,6 +19,13 @@ pub enum SExpr {
 #[derive(Debug, PartialEq, Eq)]
 pub struct ParseSExprError {
     message: String,
+}
+
+impl fmt::Display for ParseSExprError {
+    #[allow(deprecated, deprecated_in_future)]
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt.write_str(self.message.as_str())
+    }
 }
 
 impl FromStr for Atom {
