@@ -50,8 +50,10 @@ fn main() {
             continue;
         }
 
-        let result = parse_eval(input_string.as_str());
-        println!("{:?}", result);
+        match parse_eval(input_string.as_str()) {
+            Ok(v) => println!("{}", v),
+            Err(e) => println!("{:?}", e),
+        }
     }
 }
 
