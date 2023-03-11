@@ -50,7 +50,7 @@ fn main() {
             continue;
         }
 
-        match parse_eval(input_string.as_str()) {
+        match parse_eval(input_string.trim()) {
             Ok(v) => println!("{}", v),
             Err(e) => println!("{}", e),
         }
