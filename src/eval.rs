@@ -1,3 +1,4 @@
+use crate::eval::EvalError::ContractViolation;
 use crate::parse::Atom;
 use crate::parse::SExpr;
 use std::fmt;
@@ -24,18 +25,20 @@ impl fmt::Display for Value {
 }
 
 #[derive(Debug)]
-pub enum EvalError {}
+pub enum EvalError {
+    ContractViolation,
+}
 
-fn sum_values(vs: &[Value]) -> Value {
+fn sum_values(vs: &[Value]) -> Result<Value, EvalError> {
     let mut acc = 0;
     for v in vs {
         match v {
             Value::Integer(n) => acc += n,
-            Value::Procedure(_) => todo!(),
+            Value::Procedure(_) => return Err(ContractViolation),
         }
     }
 
-    Value::Integer(acc)
+    Ok(Value::Integer(acc))
 }
 
 fn product_values(vs: &[Value]) -> Value {
@@ -59,10 +62,10 @@ fn eval_atom(atom: &Atom) -> Value {
     }
 }
 
-fn apply_procedure(proc: &Value, args: &[Value]) -> Value {
+fn apply_procedure(proc: &Value, args: &[Value]) -> Result<Value, EvalError> {
     match proc {
         Value::Procedure(Procedure::Sum) => sum_values(args),
-        Value::Procedure(Procedure::Product) => product_values(args),
+        Value::Procedure(Procedure::Product) => Ok(product_values(args)),
         _ => todo!(),
     }
 }
@@ -72,7 +75,7 @@ pub fn eval(expr: &SExpr) -> Result<Value, EvalError> {
         SExpr::Atom(a) => Ok(eval_atom(a)),
         SExpr::SList(slist) => {
             let values: Vec<Value> = slist.iter().map(|e| eval(e).unwrap()).collect();
-            Ok(apply_procedure(&values[0], &values[1..]))
+            apply_procedure(&values[0], &values[1..])
         }
     }
 }
