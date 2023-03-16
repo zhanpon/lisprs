@@ -28,6 +28,8 @@ impl fmt::Display for ParseSExprError {
     }
 }
 
+impl std::error::Error for ParseSExprError {}
+
 impl FromStr for Atom {
     type Err = ParseSExprError;
 

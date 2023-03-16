@@ -29,6 +29,16 @@ pub enum EvalError {
     ContractViolation,
 }
 
+impl fmt::Display for EvalError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            EvalError::ContractViolation => write!(f, "contract violation"),
+        }
+    }
+}
+
+impl std::error::Error for EvalError {}
+
 fn sum_values(vs: &[Value]) -> Result<Value, EvalError> {
     let mut acc = 0;
     for v in vs {
