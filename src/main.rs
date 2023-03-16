@@ -9,7 +9,7 @@ mod tokenize;
 
 fn parse_eval(s: &str) -> Result<Value, ParseSExprError> {
     let ast = s.parse()?;
-    Ok(eval(&ast))
+    Ok(eval(&ast).unwrap())
 }
 
 fn main() {

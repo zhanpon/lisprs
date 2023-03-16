@@ -23,6 +23,9 @@ impl fmt::Display for Value {
     }
 }
 
+#[derive(Debug)]
+pub enum EvalError {}
+
 fn sum_values(vs: &[Value]) -> Value {
     let mut acc = 0;
     for v in vs {
@@ -64,12 +67,12 @@ fn apply_procedure(proc: &Value, args: &[Value]) -> Value {
     }
 }
 
-pub fn eval(expr: &SExpr) -> Value {
+pub fn eval(expr: &SExpr) -> Result<Value, EvalError> {
     match expr {
-        SExpr::Atom(a) => eval_atom(a),
+        SExpr::Atom(a) => Ok(eval_atom(a)),
         SExpr::SList(slist) => {
-            let values: Vec<Value> = slist.iter().map(eval).collect();
-            apply_procedure(&values[0], &values[1..])
+            let values: Vec<Value> = slist.iter().map(|e| eval(e).unwrap()).collect();
+            Ok(apply_procedure(&values[0], &values[1..]))
         }
     }
 }
