@@ -1,4 +1,3 @@
-use crate::eval::EvalError::ContractViolation;
 use crate::parse::Atom;
 use crate::parse::SExpr;
 use std::fmt;
@@ -44,7 +43,7 @@ fn sum_values(vs: &[Value]) -> Result<Value, EvalError> {
     for v in vs {
         match v {
             Value::Integer(n) => acc += n,
-            Value::Procedure(_) => return Err(ContractViolation),
+            Value::Procedure(_) => return Err(EvalError::ContractViolation),
         }
     }
 
