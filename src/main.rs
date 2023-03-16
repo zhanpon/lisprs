@@ -34,6 +34,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::eval::EvalError;
 
     fn assert_evaluates_to(expr: &str, value: i64) {
         let result = parse_eval(expr).unwrap();
@@ -61,5 +62,11 @@ mod tests {
     fn test_nested() {
         assert_evaluates_to("(+ 1 (* 2 3))", 7);
         assert_evaluates_to("(+ (* 1 2) (* 3 (+ 4 5)))", 29);
+    }
+
+    #[test]
+    fn test_eval_error() {
+        let err = parse_eval("(+ 2 *)").unwrap_err();
+        assert!(err.is::<EvalError>());
     }
 }
