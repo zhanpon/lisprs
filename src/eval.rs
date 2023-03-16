@@ -1,9 +1,18 @@
 use crate::parse::Atom;
 use crate::parse::SExpr;
+use std::fmt;
 
 #[derive(Debug, PartialEq)]
 pub enum Value {
     Integer(i64),
+}
+
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Value::Integer(i) => write!(f, "{}", i),
+        }
+    }
 }
 
 fn sum_values(vs: &[Value]) -> Value {

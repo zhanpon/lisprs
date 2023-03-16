@@ -31,7 +31,7 @@ fn main() {
         }
 
         match parse_eval(input_string.trim()) {
-            Ok(v) => println!("{:?}", v),
+            Ok(v) => println!("{}", v),
             Err(e) => println!("{}", e),
         }
     }
