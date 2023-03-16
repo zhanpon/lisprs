@@ -14,6 +14,15 @@ pub enum Value {
     Procedure(Procedure),
 }
 
+impl Value {
+    fn as_integer(&self) -> Option<i64> {
+        match self {
+            Value::Integer(i) => Some(*i),
+            _ => None,
+        }
+    }
+}
+
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -41,25 +50,19 @@ impl std::error::Error for EvalError {}
 fn sum_values(vs: &[Value]) -> Result<Value, EvalError> {
     let mut acc = 0;
     for v in vs {
-        match v {
-            Value::Integer(n) => acc += n,
-            Value::Procedure(_) => return Err(EvalError::ContractViolation),
-        }
+        acc += v.as_integer().ok_or(EvalError::ContractViolation)?
     }
 
     Ok(Value::Integer(acc))
 }
 
-fn product_values(vs: &[Value]) -> Value {
+fn product_values(vs: &[Value]) -> Result<Value, EvalError> {
     let mut acc = 1;
     for v in vs {
-        match v {
-            Value::Integer(n) => acc *= n,
-            Value::Procedure(_) => todo!(),
-        }
+        acc *= v.as_integer().ok_or(EvalError::ContractViolation)?
     }
 
-    Value::Integer(acc)
+    Ok(Value::Integer(acc))
 }
 
 fn eval_atom(atom: &Atom) -> Value {
@@ -74,7 +77,7 @@ fn eval_atom(atom: &Atom) -> Value {
 fn apply_procedure(proc: &Value, args: &[Value]) -> Result<Value, EvalError> {
     match proc {
         Value::Procedure(Procedure::Sum) => sum_values(args),
-        Value::Procedure(Procedure::Product) => Ok(product_values(args)),
+        Value::Procedure(Procedure::Product) => product_values(args),
         _ => todo!(),
     }
 }
