@@ -18,8 +18,10 @@ fn main() {
         let mut input_string = String::new();
         stdin().read_line(&mut input_string).unwrap();
 
+        // Ctrl+D
         if input_string.is_empty() {
             break;
+        // Enter
         } else if input_string == "\n" {
             continue;
         }
