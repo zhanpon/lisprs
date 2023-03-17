@@ -48,21 +48,19 @@ impl fmt::Display for EvalError {
 impl std::error::Error for EvalError {}
 
 fn sum_values(vs: &[Value]) -> Result<Value, EvalError> {
-    let mut acc = 0;
-    for v in vs {
-        acc += v.as_integer().ok_or(EvalError::ContractViolation)?
-    }
-
-    Ok(Value::Integer(acc))
+    vs.iter()
+        .map(|v| v.as_integer())
+        .sum::<Option<i64>>()
+        .map(Value::Integer)
+        .ok_or(EvalError::ContractViolation)
 }
 
 fn product_values(vs: &[Value]) -> Result<Value, EvalError> {
-    let mut acc = 1;
-    for v in vs {
-        acc *= v.as_integer().ok_or(EvalError::ContractViolation)?
-    }
-
-    Ok(Value::Integer(acc))
+    vs.iter()
+        .map(|v| v.as_integer())
+        .product::<Option<i64>>()
+        .map(Value::Integer)
+        .ok_or(EvalError::ContractViolation)
 }
 
 fn eval_atom(atom: &Atom) -> Value {
