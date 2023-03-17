@@ -16,15 +16,16 @@ pub enum SExpr {
     SList(Vec<SExpr>),
 }
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct ParseSExprError {
-    message: String,
+#[derive(Debug)]
+pub enum ParseSExprError {
+    UnmatchedParen,
 }
 
 impl fmt::Display for ParseSExprError {
-    #[allow(deprecated, deprecated_in_future)]
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt.write_str(self.message.as_str())
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ParseSExprError::UnmatchedParen => write!(f, "expected a `)` to close `(`"),
+        }
     }
 }
 
@@ -76,16 +77,12 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_atom(&mut self) -> Result<Atom, ParseSExprError> {
-        let token = self.tokenizer.next().ok_or(ParseSExprError {
-            message: "".to_string(),
-        })?;
+        let token = self.tokenizer.next().unwrap();
         Atom::from_str(token)
     }
 
     pub fn parse_expr(&mut self) -> Result<SExpr, ParseSExprError> {
-        let first_token = self.tokenizer.peek().ok_or(ParseSExprError {
-            message: "".to_string(),
-        })?;
+        let first_token = self.tokenizer.peek().unwrap();
 
         if first_token == &"(" {
             self.parse_slist().map(SExpr::SList)
@@ -108,8 +105,6 @@ impl<'a> Parser<'a> {
             exprs.push(self.parse_expr()?);
         }
 
-        Err(ParseSExprError {
-            message: "expected a `)` to close `(`".to_string(),
-        })
+        Err(ParseSExprError::UnmatchedParen)
     }
 }
