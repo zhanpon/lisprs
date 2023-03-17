@@ -19,12 +19,14 @@ pub enum SExpr {
 #[derive(Debug)]
 pub enum ParseSExprError {
     UnmatchedParen,
+    NoToken,
 }
 
 impl fmt::Display for ParseSExprError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ParseSExprError::UnmatchedParen => write!(f, "expected a `)` to close `(`"),
+            ParseSExprError::NoToken => write!(f, "there is no token to parse"),
         }
     }
 }
@@ -77,12 +79,12 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_atom(&mut self) -> Result<Atom, ParseSExprError> {
-        let token = self.tokenizer.next().unwrap();
+        let token = self.tokenizer.next().expect("Tokens should be non-empty");
         Atom::from_str(token)
     }
 
     pub fn parse_expr(&mut self) -> Result<SExpr, ParseSExprError> {
-        let first_token = self.tokenizer.peek().unwrap();
+        let first_token = self.tokenizer.peek().ok_or(ParseSExprError::NoToken)?;
 
         if first_token == &"(" {
             self.parse_slist().map(SExpr::SList)
