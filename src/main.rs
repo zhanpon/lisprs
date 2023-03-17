@@ -1,15 +1,13 @@
 use crate::eval::{eval, Value};
 use std::io::{stdin, stdout, Write};
 
-use crate::parse::ParseSExprError;
-
 mod eval;
 mod parse;
 mod tokenize;
 
-fn parse_eval(s: &str) -> Result<Value, ParseSExprError> {
+fn parse_eval(s: &str) -> Result<Value, Box<dyn std::error::Error>> {
     let ast = s.parse()?;
-    Ok(eval(&ast))
+    Ok(eval(&ast)?)
 }
 
 fn main() {
@@ -20,8 +18,10 @@ fn main() {
         let mut input_string = String::new();
         stdin().read_line(&mut input_string).unwrap();
 
+        // Ctrl+D
         if input_string.is_empty() {
             break;
+        // Enter
         } else if input_string == "\n" {
             continue;
         }
@@ -30,38 +30,5 @@ fn main() {
             Ok(v) => println!("{}", v),
             Err(e) => println!("{}", e),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn assert_evaluates_to(expr: &str, value: i64) {
-        let result = parse_eval(expr).unwrap();
-        assert_eq!(result, Value::Integer(value));
-    }
-
-    #[test]
-    fn test_add() {
-        assert_evaluates_to("(+ 2 3)", 5);
-        assert_evaluates_to("(+ 4 5)", 9);
-    }
-
-    #[test]
-    fn test_mul() {
-        assert_evaluates_to("(* 2 3)", 6);
-        assert_evaluates_to("(* 4 5)", 20);
-    }
-
-    #[test]
-    fn test_atom() {
-        assert_evaluates_to("3", 3);
-    }
-
-    #[test]
-    fn test_nested() {
-        assert_evaluates_to("(+ 1 (* 2 3))", 7);
-        assert_evaluates_to("(+ (* 1 2) (* 3 (+ 4 5)))", 29);
     }
 }
