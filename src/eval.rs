@@ -63,7 +63,15 @@ fn product_values(vs: &[Value]) -> Result<Value, EvalError> {
         .ok_or(EvalError::ContractViolation)
 }
 
-fn eval_atom(atom: &Atom) -> Value {
+pub struct Env {}
+
+impl Env {
+    pub fn empty() -> Self {
+        Self {}
+    }
+}
+
+fn eval_atom(atom: &Atom, _env: &Env) -> Value {
     match atom {
         Atom::Integer(i) => Value::Integer(*i),
         Atom::Symbol(s) if s == "+" => Value::Procedure(Procedure::Sum),
@@ -80,11 +88,11 @@ fn apply_procedure(proc: &Value, args: &[Value]) -> Result<Value, EvalError> {
     }
 }
 
-pub fn eval(expr: &SExpr) -> Result<Value, EvalError> {
+pub fn eval(expr: &SExpr, _env: &Env) -> Result<Value, EvalError> {
     match expr {
-        SExpr::Atom(a) => Ok(eval_atom(a)),
+        SExpr::Atom(a) => Ok(eval_atom(a, _env)),
         SExpr::SList(slist) => {
-            let values: Vec<Value> = slist.iter().map(|e| eval(e).unwrap()).collect();
+            let values: Vec<Value> = slist.iter().map(|e| eval(e, _env).unwrap()).collect();
             apply_procedure(&values[0], &values[1..])
         }
     }
@@ -95,7 +103,8 @@ mod tests {
     use super::*;
 
     fn assert_evaluates_to(expr: &str, value: i64) {
-        let result = eval(&expr.parse().unwrap()).unwrap();
+        let empty_env = Env::empty();
+        let result = eval(&expr.parse().unwrap(), &empty_env).unwrap();
         assert_eq!(result, Value::Integer(value));
     }
 
@@ -124,7 +133,8 @@ mod tests {
 
     #[test]
     fn test_eval_error() {
-        let result = eval(&"(+ 2 *)".parse().unwrap());
+        let empty_env = Env::empty();
+        let result = eval(&"(+ 2 *)".parse().unwrap(), &empty_env);
         assert!(result.is_err())
     }
 }
