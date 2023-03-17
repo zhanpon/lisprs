@@ -2,17 +2,13 @@ use crate::eval::{eval, Value};
 use std::io::{stdin, stdout, Write};
 
 use crate::parse::ParseSExprError;
-use crate::parse::Parser;
-use crate::tokenize::Tokenizer;
 
 mod eval;
 mod parse;
 mod tokenize;
 
 fn parse_eval(s: &str) -> Result<Value, ParseSExprError> {
-    let tokens = Tokenizer::from(s);
-    let mut parser = Parser::new(tokens);
-    let ast = parser.parse_expr()?;
+    let ast = s.parse()?;
     Ok(eval(&ast))
 }
 

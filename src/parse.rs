@@ -41,6 +41,16 @@ impl FromStr for Atom {
     }
 }
 
+impl FromStr for SExpr {
+    type Err = ParseSExprError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let tokens = Tokenizer::from(s);
+        let mut parser = Parser::new(tokens);
+        parser.parse_expr()
+    }
+}
+
 pub struct Parser<'a> {
     pub tokenizer: Peekable<Tokenizer<'a>>,
 }
