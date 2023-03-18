@@ -97,11 +97,11 @@ fn apply_procedure(proc: &Value, args: &[Value]) -> Result<Value, EvalError> {
     }
 }
 
-pub fn eval(expr: &SExpr, _env: &Env) -> Result<Value, EvalError> {
+pub fn eval(expr: &SExpr, env: &Env) -> Result<Value, EvalError> {
     match expr {
-        SExpr::Atom(a) => Ok(eval_atom(a, _env)),
+        SExpr::Atom(a) => Ok(eval_atom(a, env)),
         SExpr::SList(slist) => {
-            let values: Vec<Value> = slist.iter().map(|e| eval(e, _env).unwrap()).collect();
+            let values: Vec<Value> = slist.iter().map(|e| eval(e, env).unwrap()).collect();
             apply_procedure(&values[0], &values[1..])
         }
     }
