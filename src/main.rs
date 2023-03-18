@@ -7,7 +7,7 @@ mod parse;
 mod tokenize;
 
 fn parse_eval(s: &str) -> Result<Value, Box<dyn std::error::Error>> {
-    let env = Env::empty();
+    let env = Env::standard();
     let ast = s.parse()?;
     Ok(eval(&ast, &env)?)
 }

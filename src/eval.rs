@@ -1,14 +1,15 @@
 use crate::parse::Atom;
 use crate::parse::SExpr;
+use std::collections::HashMap;
 use std::fmt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Procedure {
     Sum,
     Product,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Value {
     Integer(i64),
     Procedure(Procedure),
@@ -63,20 +64,28 @@ fn product_values(vs: &[Value]) -> Result<Value, EvalError> {
         .ok_or(EvalError::ContractViolation)
 }
 
-pub struct Env {}
+pub struct Env {
+    table: HashMap<String, Value>,
+}
 
 impl Env {
-    pub fn empty() -> Self {
-        Self {}
+    pub fn standard() -> Self {
+        let mut map = HashMap::new();
+        map.insert("+".to_string(), Value::Procedure(Procedure::Sum));
+        map.insert("*".to_string(), Value::Procedure(Procedure::Product));
+
+        Self { table: map }
+    }
+
+    fn get(&self, k: &str) -> Option<&Value> {
+        self.table.get(k)
     }
 }
 
-fn eval_atom(atom: &Atom, _env: &Env) -> Value {
+fn eval_atom(atom: &Atom, env: &Env) -> Value {
     match atom {
         Atom::Integer(i) => Value::Integer(*i),
-        Atom::Symbol(s) if s == "+" => Value::Procedure(Procedure::Sum),
-        Atom::Symbol(s) if s == "*" => Value::Procedure(Procedure::Product),
-        _ => todo!(),
+        Atom::Symbol(s) => env.get(s).unwrap().clone(),
     }
 }
 
@@ -103,7 +112,7 @@ mod tests {
     use super::*;
 
     fn assert_evaluates_to(expr: &str, value: i64) {
-        let empty_env = Env::empty();
+        let empty_env = Env::standard();
         let result = eval(&expr.parse().unwrap(), &empty_env).unwrap();
         assert_eq!(result, Value::Integer(value));
     }
@@ -133,7 +142,7 @@ mod tests {
 
     #[test]
     fn test_eval_error() {
-        let empty_env = Env::empty();
+        let empty_env = Env::standard();
         let result = eval(&"(+ 2 *)".parse().unwrap(), &empty_env);
         assert!(result.is_err())
     }
