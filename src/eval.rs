@@ -82,10 +82,10 @@ impl Env {
     }
 }
 
-fn eval_atom(atom: &Atom, env: &Env) -> Value {
+fn eval_atom(atom: &Atom, env: &Env) -> Result<Value, EvalError> {
     match atom {
-        Atom::Integer(i) => Value::Integer(*i),
-        Atom::Symbol(s) => env.get(s).unwrap().clone(),
+        Atom::Integer(i) => Ok(Value::Integer(*i)),
+        Atom::Symbol(s) => Ok(env.get(s).unwrap().clone()),
     }
 }
 
@@ -99,7 +99,7 @@ fn apply_procedure(proc: &Value, args: &[Value]) -> Result<Value, EvalError> {
 
 pub fn eval(expr: &SExpr, env: &Env) -> Result<Value, EvalError> {
     match expr {
-        SExpr::Atom(a) => Ok(eval_atom(a, env)),
+        SExpr::Atom(a) => eval_atom(a, env),
         SExpr::SList(slist) => {
             let values: Vec<Value> = slist.iter().map(|e| eval(e, env).unwrap()).collect();
             apply_procedure(&values[0], &values[1..])
