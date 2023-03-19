@@ -16,6 +16,15 @@ pub enum SExpr {
     SList(Vec<SExpr>),
 }
 
+impl SExpr {
+    pub fn as_slist(&self) -> Option<&Vec<SExpr>> {
+        match self {
+            SExpr::SList(slist) => Some(slist),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum ParseSExprError {
     UnmatchedParen,
