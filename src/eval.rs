@@ -36,12 +36,14 @@ impl fmt::Display for Value {
 #[derive(Debug)]
 pub enum EvalError {
     ContractViolation,
+    Undefined(String),
 }
 
 impl fmt::Display for EvalError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             EvalError::ContractViolation => write!(f, "contract violation"),
+            EvalError::Undefined(x) => write!(f, "{}: undefined", x),
         }
     }
 }
@@ -85,7 +87,13 @@ impl Env {
 fn eval_atom(atom: &Atom, env: &Env) -> Result<Value, EvalError> {
     match atom {
         Atom::Integer(i) => Ok(Value::Integer(*i)),
-        Atom::Symbol(s) => Ok(env.get(s).unwrap().clone()),
+        Atom::Symbol(s) => {
+            if let Some(v) = env.get(s) {
+                Ok(v.clone())
+            } else {
+                Err(EvalError::Undefined(s.clone()))
+            }
+        }
     }
 }
 
