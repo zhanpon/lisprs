@@ -1,3 +1,4 @@
+use crate::eval::Env;
 use crate::eval::{eval, Value};
 use std::io::{stdin, stdout, Write};
 
@@ -6,8 +7,9 @@ mod parse;
 mod tokenize;
 
 fn parse_eval(s: &str) -> Result<Value, Box<dyn std::error::Error>> {
+    let env = Env::standard();
     let ast = s.parse()?;
-    Ok(eval(&ast)?)
+    Ok(eval(&ast, &env)?)
 }
 
 fn main() {
